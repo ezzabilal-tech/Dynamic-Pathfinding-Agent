@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Pathfinding Agent</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Fira+Code:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Controls -->
+        <aside class="sidebar">
+            <div class="sidebar-scroll">
+                
+                <!-- Grid Settings -->
+                <section class="control-group">
+                    <h3>⚙ GRID SETTINGS</h3>
+                    <div class="setting-row">
+                        <label for="spin-rows">Rows</label>
+                        <input type="number" id="spin-rows" min="5" max="40" value="20">
+                    </div>
+                    <div class="setting-row">
+                        <label for="spin-cols">Cols</label>
+                        <input type="number" id="spin-cols" min="5" max="60" value="28">
+                    </div>
+                    <div class="setting-row vertical">
+                        <div class="slider-label">
+                            <label for="slider-density">Obstacle Density</label>
+                            <span id="density-val">0.30</span>
+                        </div>
+                        <input type="range" id="slider-density" min="0.05" max="0.70" step="0.05" value="0.30">
+                    </div>
+                    <button id="btn-generate" class="btn btn-accent">Generate Map</button>
+                    <button id="btn-clear" class="btn btn-border">Clear Map</button>
+                </section>
+
+                <!-- Edit Mode -->
+                <section class="control-group">
+                    <h3>✏ EDIT MODE</h3>
+                    <div class="radio-buttons-vertical">
+                        <label class="radio-btn active" data-mode="wall">
+                            <input type="radio" name="edit-mode" value="wall" checked>
+                            <span>🧱 Place / Remove Wall</span>
+                        </label>
+                        <label class="radio-btn" data-mode="start">
+                            <input type="radio" name="edit-mode" value="start">
+                            <span>🟢 Move Start Node</span>
+                        </label>
+                        <label class="radio-btn" data-mode="goal">
+                            <input type="radio" name="edit-mode" value="goal">
+                            <span>🔴 Move Goal Node</span>
+                        </label>
+                    </div>
+                </section>
+
+                <!-- Algorithm -->
+                <section class="control-group">
+                    <h3>🔍 ALGORITHM</h3>
+                    <div class="option-list">
+                        <label class="option-item">
+                            <input type="radio" name="algo" value="A*" checked>
+                            <span class="custom-radio"></span>
+                            <span>A*</span>
+                        </label>
+                        <label class="option-item">
+                            <input type="radio" name="algo" value="GBFS">
+                            <span class="custom-radio"></span>
+                            <span>GBFS</span>
+                        </label>
+                    </div>
+                </section>
+
+                <!-- Heuristic -->
+                <section class="control-group">
+                    <h3>📐 HEURISTIC</h3>
+                    <div class="option-list">
+                        <label class="option-item">
+                            <input type="radio" name="heuristic" value="Manhattan" checked>
+                            <span class="custom-radio"></span>
+                            <span>Manhattan</span>
+                        </label>
+                        <label class="option-item">
+                            <input type="radio" name="heuristic" value="Euclidean">
+                            <span class="custom-radio"></span>
+                            <span>Euclidean</span>
+                        </label>
+                        <label class="option-item">
+                            <input type="radio" name="heuristic" value="Chebyshev">
+                            <span class="custom-radio"></span>
+                            <span>Chebyshev</span>
+                        </label>
+                    </div>
+                </section>
+
+                <!-- Options -->
+                <section class="control-group">
+                    <h3>🎛 OPTIONS</h3>
+                    <div class="option-list">
+                        <label class="option-item">
+                            <input type="checkbox" id="chk-dynamic">
+                            <span class="custom-checkbox"></span>
+                            <span>Dynamic Obstacles</span>
+                        </label>
+                        <label class="option-item">
+                            <input type="checkbox" id="chk-diagonal">
+                            <span class="custom-checkbox"></span>
+                            <span>8-Directional Movement</span>
+                        </label>
+                    </div>
+                </section>
+
+                <!-- Control -->
+                <section class="control-group">
+                    <h3>🚀 CONTROL</h3>
+                    <button id="btn-find" class="btn btn-start">▶ Find Path</button>
+                    <button id="btn-reset" class="btn btn-reset">⟳ Reset Visualisation</button>
+                    <button id="btn-stop" class="btn btn-goal">⏹ Stop</button>
+                </section>
+
+                <!-- Metrics -->
+                <section class="control-group metrics-panel">
+                    <h3>📊 METRICS</h3>
+                    <div class="metric-row">
+                        <span class="metric-lbl">Nodes Visited:</span>
+                        <span id="metric-visited" class="metric-val color-visited">0</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-lbl">Path Cost:</span>
+                        <span id="metric-cost" class="metric-val color-path">0</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-lbl">Time:</span>
+                        <span id="metric-time" class="metric-val color-frontier">0 ms</span>
+                    </div>
+                    <div class="status-banner" id="status-text">Ready</div>
+                </section>
+
+                <!-- Legend -->
+                <section class="control-group legend-panel">
+                    <h3>🎨 LEGEND</h3>
+                    <div class="legend-grid">
+                        <div class="legend-item"><span class="legend-box color-start"></span><span>Start</span></div>
+                        <div class="legend-item"><span class="legend-box color-goal"></span><span>Goal</span></div>
+                        <div class="legend-item"><span class="legend-box color-wall"></span><span>Wall</span></div>
+                        <div class="legend-item"><span class="legend-box color-frontier"></span><span>Frontier</span></div>
+                        <div class="legend-item"><span class="legend-box color-visited"></span><span>Visited</span></div>
+                        <div class="legend-item"><span class="legend-box color-path"></span><span>Path</span></div>
+                        <div class="legend-item"><span class="legend-box color-agent"></span><span>Agent</span></div>
+                        <div class="legend-item"><span class="legend-box color-new-wall"></span><span>New Wall</span></div>
+                    </div>
+                </section>
+
+            </div>
+        </aside>
+
+        <!-- Main Visualization Canvas -->
+        <main class="visualizer-container">
+            <header class="app-header">
+                <h1>DYNAMIC PATHFINDING AGENT</h1>
+                <p>Click grid to edit • Use controls on the left to run</p>
+            </header>
+            
+            <div class="grid-scroll-wrapper">
+                <div id="grid-container" class="grid-container"></div>
+            </div>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
