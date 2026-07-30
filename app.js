@@ -756,7 +756,3 @@ function replan() {
 
 // Initial draw
 buildGridDOM();
-setStatusText = (txt) => { statusText.textContent = txt; };
-setMetricVisited = (val) => { metricVisited.textContent = val; };
-setMetricCost = (val) => { metricCost.textContent = val; };
-setMetricTime = (val) => { metricTime.textContent = val; };
